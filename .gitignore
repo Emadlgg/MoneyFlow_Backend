@@ -1,0 +1,4 @@
+# Ignorar dependencias y variables de entorno
+node_modules/
+.env
+*.log

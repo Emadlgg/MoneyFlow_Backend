@@ -1,26 +1,28 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { initializeDB } = require('./db'); // Importa la inicialización de la DB
+const { initializeDB } = require('./db');
 
 const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(express.json()); // Para parsear JSON en las peticiones
+app.use(express.json());
 
-// Rutas (ejemplo)
+// Monta las rutas de auth con prefijo /api/auth
 app.use('/api/auth', require('./routes/auth.routes'));
+
+// Monta las rutas de transacciones con prefijo /api/transactions
 app.use('/api/transactions', require('./routes/transaction.routes'));
 
-// Ruta de prueba
 app.get('/', (req, res) => {
   res.send('MoneyFlow API está funcionando!');
 });
 
-// Manejo de errores global
+// Manejo de errores
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Algo salió mal en el servidor' });
 });
 
-module.exports = app; // Exporta la app para usarla en index.js
+module.exports = app;

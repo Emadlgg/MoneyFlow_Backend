@@ -1,60 +1,64 @@
-const express = require('express');
-const router = express.Router();
-const { Transaction } = require('../db'); // Se importa el modelo Transaction desde la configuración de la DB
+// routes/transaction.routes.js
+const express = require('express')
+const router = express.Router()
+const supabase = require('../supabase')
 
-// Middleware para validar la transacción en el endpoint POST
-const validateTransaction = (req, res, next) => {
-  const { amount, category } = req.body;
-  const errors = {};
-
-  if (amount === undefined || isNaN(amount)) {
-    errors.amount = 'Valid amount is required';
+// Middleware de autenticación: extrae y valida JWT
+router.use(async (req, res, next) => {
+  const auth = req.headers.authorization
+  if (!auth?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No autorizado' })
   }
-  if (!category || !category.trim()) {
-    errors.category = 'Category is required';
+  const token = auth.replace('Bearer ', '')
+  const {
+    data: { user },
+    error
+  } = await supabase.auth.getUser(token)
+  if (error || !user) {
+    return res.status(401).json({ error: 'Token inválido' })
   }
+  req.user = user
+  next()
+})
 
-  if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ 
-      error: 'Validation failed',
-      details: errors
-    });
-  }
-  next();
-};
-
-// Endpoint POST para crear una nueva transacción
-router.post('/', validateTransaction, async (req, res) => {
+// Listar transacciones del usuario
+router.get('/', async (req, res, next) => {
   try {
-    const transaction = await Transaction.create({
-      amount: parseFloat(req.body.amount),
-      category: req.body.category.trim(),
-      date: req.body.date || new Date()
-    });
-
-    // Devuelve la transacción creada (puedes devolver el objeto completo o formatearlo según prefieras)
-    res.status(201).json(transaction);
-  } catch (error) {
-    console.error('Transaction error:', error);
-    res.status(error.name === 'SequelizeValidationError' ? 400 : 500).json({
-      error: 'Transaction processing failed',
-      details: error.errors ? error.errors.map(e => ({
-        field: e.path,
-        message: e.message
-      })) : error.message
-    });
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('date', { ascending: false })
+    if (error) throw error
+    res.json(data)
+  } catch (err) {
+    next(err)
   }
-});
+})
 
-// **Nuevo:** Endpoint GET para obtener todas las transacciones
-router.get('/', async (req, res) => {
+// Crear nueva transacción (incluye explícitamente user_id)
+router.post('/', async (req, res, next) => {
+  const { amount, category, date } = req.body
+  if (typeof amount !== 'number' || !category) {
+    return res.status(400).json({ error: 'amount y category son requeridos' })
+  }
   try {
-    const transactions = await Transaction.findAll();
-    res.json(transactions);
-  } catch (error) {
-    console.error('Error fetching transactions:', error);
-    res.status(500).json({ error: 'Error fetching transactions' });
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert([
+        {
+          user_id: req.user.id,
+          amount,
+          category,
+          date: date || new Date()
+        }
+      ])
+      .single()
+    if (error) throw error
+    res.status(201).json(data)
+  } catch (err) {
+    next(err)
   }
-});
+})
 
-module.exports = router;
+module.exports = router

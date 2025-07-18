@@ -4,8 +4,30 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:services": "jest tests/services --coverage"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "testMatch": ["**/__tests__/**/*.js", "**/?(*.)+(spec|test).js"],
+    "collectCoverageFrom": [
+      "services/**/*.js",
+      "!**/node_modules/**",
+      "!**/tests/**"
+    ],
+    "coverageThreshold": {
+      "services/**/*.js": {
+        "branches": 65,
+        "functions": 80,
+        "lines": 75,
+        "statements": 75
+      }
+    },
+    "coverageReporters": ["text", "lcov", "html"]
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
@@ -18,5 +40,11 @@
     "pg": "^8.14.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.1"
+  },
+  "devDependencies": {
+    "jest": "^30.0.4",
+    "jsdom": "^26.1.0",
+    "mongodb-memory-server": "^10.1.4",
+    "supertest": "^7.1.3"
   }
 }

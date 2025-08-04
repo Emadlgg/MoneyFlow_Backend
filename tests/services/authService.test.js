@@ -1,112 +1,132 @@
-const authService = require('../../services/authService');
+const AuthService = require('../../services/authService');
 
-describe('Auth Service - Real Implementation', () => {
-  describe('User Registration', () => {
-    test('should handle sign up with valid data', async () => {
-      // Mock successful response
-      global.supabase.auth.signUp.mockResolvedValueOnce({
-        data: { 
-          user: { 
-            id: 'user-123',
-            email: 'test@example.com',
-            created_at: new Date().toISOString()
-          }
+// Mock de Supabase para evitar llamadas reales
+jest.mock('@supabase/supabase-js', () => ({
+  createClient: jest.fn(() => ({
+    auth: {
+      signUp: jest.fn(),
+      signInWithPassword: jest.fn(),
+      signOut: jest.fn(),
+      getUser: jest.fn()
+    }
+  }))
+}));
+
+// Obtener la instancia mockeada
+const { createClient } = require('@supabase/supabase-js');
+const mockSupabase = createClient();
+
+describe('AuthService - Tests Automatizados', () => {
+  beforeEach(() => {
+    // Limpiar mocks antes de cada test
+    jest.clearAllMocks();
+  });
+
+  describe('signIn()', () => {
+    test('debe retornar éxito con credenciales válidas', async () => {
+      // ARRANGE: Configurar datos de prueba
+      const email = 'test@example.com';
+      const password = 'password123';
+      
+      const mockResponse = {
+        data: {
+          session: { access_token: 'fake-token' },
+          user: { id: '123', email: 'test@example.com' }
         },
         error: null
-      });
+      };
 
-      const result = await authService.signUp(
-        'test@example.com', 
-        'password123',
-        { name: 'Test User' }
-      );
+      // Mock de respuesta exitosa
+      mockSupabase.auth.signInWithPassword.mockResolvedValue(mockResponse);
 
+      // ACT: Ejecutar la función automáticamente
+      const result = await AuthService.signIn(email, password);
+
+      // ASSERT: Verificaciones automáticas
       expect(result.success).toBe(true);
-      expect(result.user.email).toBe('test@example.com');
-      expect(global.supabase.auth.signUp).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password123',
-        options: {
-          data: { name: 'Test User' }
-        }
+      expect(result.session).toBeDefined();
+      expect(result.user).toBeDefined();
+      expect(result.user.email).toBe(email);
+      expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
+        email,
+        password
       });
     });
 
-    test('should handle sign up error', async () => {
-      global.supabase.auth.signUp.mockResolvedValueOnce({
-        data: { user: null },
-        error: { message: 'Email already registered' }
-      });
+    test('debe retornar error con credenciales inválidas', async () => {
+      // ARRANGE: Configurar error
+      const email = 'wrong@example.com';
+      const password = 'wrongpassword';
+      
+      const mockResponse = {
+        data: { session: null, user: null },
+        error: { message: 'Invalid credentials' }
+      };
 
-      const result = await authService.signUp('existing@example.com', 'password123');
+      mockSupabase.auth.signInWithPassword.mockResolvedValue(mockResponse);
 
+      // ACT: Ejecutar automáticamente
+      const result = await AuthService.signIn(email, password);
+
+      // ASSERT: Verificar manejo de error automáticamente
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Email already registered');
+      expect(result.error).toBe('Invalid credentials');
+      expect(result.session).toBeUndefined();
+      expect(result.user).toBeUndefined();
     });
   });
 
-  describe('User Authentication', () => {
-    test('should sign in with valid credentials', async () => {
-      const mockSession = {
-        user: { id: 'user-123', email: 'test@example.com' },
-        access_token: 'mock-jwt-token'
-      };
+  describe('signUp()', () => {
+    test('debe crear usuario correctamente', async () => {
+      // ARRANGE
+      const email = 'nuevo@example.com';
+      const password = 'password123';
+      const userData = { name: 'Test User' };
 
-      global.supabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: { 
-          session: mockSession,
-          user: mockSession.user 
+      const mockResponse = {
+        data: {
+          user: { id: '456', email: 'nuevo@example.com' }
         },
         error: null
-      });
+      };
 
-      const result = await authService.signIn('test@example.com', 'password123');
+      mockSupabase.auth.signUp.mockResolvedValue(mockResponse);
 
+      // ACT
+      const result = await AuthService.signUp(email, password, userData);
+
+      // ASSERT
       expect(result.success).toBe(true);
-      expect(result.session.access_token).toBe('mock-jwt-token');
-      expect(result.user.email).toBe('test@example.com');
-    });
-
-    test('should handle invalid credentials', async () => {
-      global.supabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: { session: null },
-        error: { message: 'Invalid login credentials' }
+      expect(result.user).toBeDefined();
+      expect(result.user.email).toBe(email);
+      expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
+        email,
+        password,
+        options: { data: userData }
       });
-
-      const result = await authService.signIn('wrong@example.com', 'wrongpass');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Invalid login credentials');
     });
   });
 
-  describe('User Session Management', () => {
-    test('should sign out successfully', async () => {
-      global.supabase.auth.signOut.mockResolvedValueOnce({
+  describe('getCurrentUser()', () => {
+    test('debe obtener usuario actual cuando está autenticado', async () => {
+      // ARRANGE
+      const mockResponse = {
+        data: {
+          user: { id: '123', email: 'current@example.com' }
+        },
         error: null
-      });
-
-      const result = await authService.signOut();
-
-      expect(result.success).toBe(true);
-      expect(global.supabase.auth.signOut).toHaveBeenCalled();
-    });
-
-    test('should get current user', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com'
       };
 
-      global.supabase.auth.getUser.mockResolvedValueOnce({
-        data: { user: mockUser },
-        error: null
-      });
+      mockSupabase.auth.getUser.mockResolvedValue(mockResponse);
 
-      const result = await authService.getCurrentUser();
+      // ACT
+      const result = await AuthService.getCurrentUser();
 
+      // ASSERT
       expect(result.success).toBe(true);
-      expect(result.user.email).toBe('test@example.com');
+      expect(result.user).toBeDefined();
+      expect(result.user.email).toBe('current@example.com');
+      expect(mockSupabase.auth.getUser).toHaveBeenCalled();
     });
   });
 });

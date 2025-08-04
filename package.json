@@ -12,8 +12,13 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
-    "testMatch": ["**/__tests__/**/*.js", "**/?(*.)+(spec|test).js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.js",
+      "**/?(*.)+(spec|test).js"
+    ],
     "collectCoverageFrom": [
       "services/**/*.js",
       "!**/node_modules/**",
@@ -27,7 +32,11 @@
         "statements": 75
       }
     },
-    "coverageReporters": ["text", "lcov", "html"]
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
@@ -42,9 +51,9 @@
     "sequelize": "^6.37.1"
   },
   "devDependencies": {
-    "jest": "^30.0.4",
+    "jest": "^30.0.5",
     "jsdom": "^26.1.0",
     "mongodb-memory-server": "^10.1.4",
-    "supertest": "^7.1.3"
+    "supertest": "^7.1.4"
   }
 }

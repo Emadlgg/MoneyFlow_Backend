@@ -25,6 +25,7 @@ app.use('/api', (req, res, next) => {
 // Rutas
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/transactions', require('./routes/transaction.routes'));
+app.use("/api/notifications", require("./routes/notification.routes"));
 
 // Healthcheck
 app.get('/api/health', (req, res) => {

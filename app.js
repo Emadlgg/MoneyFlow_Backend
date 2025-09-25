@@ -26,6 +26,7 @@ app.use('/api', (req, res, next) => {
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/transactions', require('./routes/transaction.routes'));
 app.use("/api/notifications", require("./routes/notification.routes"));
+app.use('/api/tips', require('./routes/tips.routes')); // ← ✅ ESTA ES LA ÚNICA LÍNEA QUE AGREGAR
 
 // Healthcheck
 app.get('/api/health', (req, res) => {

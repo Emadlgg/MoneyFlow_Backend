@@ -26,6 +26,7 @@
     }
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.49.4",
     "backend": "file:",
     "bcryptjs": "^3.0.2",

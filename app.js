@@ -4,9 +4,15 @@ const cors = require('cors');
 
 const app = express();
 
-// CORS
+// CORS - ACTUALIZADO para Vercel
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://moneyflow-frontend.vercel.app',           // Production
+    'https://moneyflow-frontend-git-develop.vercel.app', // Staging
+    /https:\/\/moneyflow-frontend-.*\.vercel\.app$/     // Todos los previews
+  ],
   methods: ['GET','POST','PUT','PATCH','DELETE'],
   allowedHeaders: ['Content-Type','Authorization'],
   credentials: true
@@ -26,7 +32,7 @@ app.use('/api', (req, res, next) => {
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/transactions', require('./routes/transaction.routes'));
 app.use("/api/notifications", require("./routes/notification.routes"));
-app.use('/api/tips', require('./routes/tips.routes')); // ← ✅ ESTA ES LA ÚNICA LÍNEA QUE AGREGAR
+app.use('/api/tips', require('./routes/tips.routes'));
 
 // Healthcheck
 app.get('/api/health', (req, res) => {

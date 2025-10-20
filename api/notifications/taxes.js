@@ -1,4 +1,5 @@
 const supabase = require('../../supabase');
+const { handleCors } = require('../_helpers/cors');
 
 async function authenticate(req) {
   const authHeader = req.headers.authorization;
@@ -17,7 +18,7 @@ async function authenticate(req) {
   return user;
 }
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   try {
     const user = await authenticate(req);
     
@@ -71,4 +72,6 @@ module.exports = async (req, res) => {
     
     return res.status(500).json({ error: error.message || 'SERVER_ERROR' });
   }
-};
+}
+
+module.exports = (req, res) => handleCors(req, res, handler);

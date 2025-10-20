@@ -1,5 +1,6 @@
 const transactionService = require('../../services/transactionService');
 const supabase = require('../../supabase');
+const { handleCors } = require('../_helpers/cors');
 
 async function authenticate(req) {
   const authHeader = req.headers.authorization;
@@ -18,14 +19,13 @@ async function authenticate(req) {
   return user;
 }
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   
   try {
     const user = await authenticate(req);
-    
     const result = await transactionService.getTransactionStats(user.id);
     
     if (!result.success) {
@@ -45,4 +45,6 @@ module.exports = async (req, res) => {
       error: error.message || 'SERVER_ERROR' 
     });
   }
-};
+}
+
+module.exports = (req, res) => handleCors(req, res, handler);

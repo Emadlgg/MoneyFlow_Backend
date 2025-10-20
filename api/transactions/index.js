@@ -1,7 +1,7 @@
 const transactionService = require('../../services/transactionService');
 const supabase = require('../../supabase');
+const { handleCors } = require('../_helpers/cors');
 
-// Middleware de autenticación inline
 async function authenticate(req) {
   const authHeader = req.headers.authorization;
   
@@ -19,13 +19,11 @@ async function authenticate(req) {
   return user;
 }
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   try {
-    // Autenticar usuario
     const user = await authenticate(req);
     
     if (req.method === 'GET') {
-      // Listar transacciones con filtros opcionales
       const filters = {
         type: req.query.type,
         category: req.query.category,
@@ -42,7 +40,6 @@ module.exports = async (req, res) => {
       return res.status(200).json(result.transactions);
       
     } else if (req.method === 'POST') {
-      // Crear transacción
       const result = await transactionService.createTransaction(user.id, req.body);
       
       if (!result.success) {
@@ -65,4 +62,6 @@ module.exports = async (req, res) => {
       error: error.message || 'SERVER_ERROR' 
     });
   }
-};
+}
+
+module.exports = (req, res) => handleCors(req, res, handler);

@@ -1,6 +1,7 @@
 const authService = require('../../services/authService');
+const { handleCors } = require('../_helpers/cors');
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -28,4 +29,6 @@ module.exports = async (req, res) => {
       error: error.message || 'SERVER_ERROR' 
     });
   }
-};
+}
+
+module.exports = (req, res) => handleCors(req, res, handler);

@@ -1,6 +1,6 @@
 const supabase = require('../../supabase');
+const { handleCors } = require('../_helpers/cors');
 
-// Middleware de autenticación inline
 async function authenticate(req) {
   const authHeader = req.headers.authorization;
   
@@ -18,14 +18,11 @@ async function authenticate(req) {
   return user;
 }
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   try {
     const user = await authenticate(req);
-    
-    // Manejar diferentes rutas y métodos
     const path = req.url.split('?')[0];
     
-    // GET /api/notifications/preferences
     if (req.method === 'GET' && path.includes('/preferences')) {
       const { data, error } = await supabase
         .from("notification_preferences")
@@ -40,7 +37,6 @@ module.exports = async (req, res) => {
       return res.json({ preferences: data?.preferences ?? null });
     }
     
-    // POST /api/notifications/preferences
     if (req.method === 'POST' && path.includes('/preferences')) {
       const prefs = req.body?.preferences;
       
@@ -67,7 +63,6 @@ module.exports = async (req, res) => {
       return res.json({ ok: true, preferences: data.preferences });
     }
     
-    // GET /api/notifications/taxes
     if (req.method === 'GET' && path.includes('/taxes')) {
       const { data, error } = await supabase
         .from("taxes_due")
@@ -80,7 +75,6 @@ module.exports = async (req, res) => {
       return res.json({ taxes: data });
     }
     
-    // POST /api/notifications/taxes
     if (req.method === 'POST' && path.includes('/taxes')) {
       const { id, tax_id, tax_label, due_day, due_month, email } = req.body;
       
@@ -123,4 +117,6 @@ module.exports = async (req, res) => {
       error: error.message || 'SERVER_ERROR' 
     });
   }
-};
+}
+
+module.exports = (req, res) => handleCors(req, res, handler);

@@ -1,7 +1,7 @@
 const transactionService = require('../../services/transactionService');
 const supabase = require('../../supabase');
+const { handleCors } = require('../_helpers/cors');
 
-// Middleware de autenticación inline
 async function authenticate(req) {
   const authHeader = req.headers.authorization;
   
@@ -19,12 +19,9 @@ async function authenticate(req) {
   return user;
 }
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   try {
-    // Autenticar usuario
     const user = await authenticate(req);
-    
-    // Obtener ID de la transacción desde la URL
     const { id } = req.query;
     
     if (!id) {
@@ -32,7 +29,6 @@ module.exports = async (req, res) => {
     }
     
     if (req.method === 'GET') {
-      // Obtener transacción específica
       const result = await transactionService.getUserTransactions(user.id, {});
       
       if (!result.success) {
@@ -48,7 +44,6 @@ module.exports = async (req, res) => {
       return res.status(200).json(transaction);
       
     } else if (req.method === 'PUT' || req.method === 'PATCH') {
-      // Actualizar transacción
       const result = await transactionService.updateTransaction(id, user.id, req.body);
       
       if (!result.success) {
@@ -58,7 +53,6 @@ module.exports = async (req, res) => {
       return res.status(200).json(result.transaction);
       
     } else if (req.method === 'DELETE') {
-      // Eliminar transacción
       const result = await transactionService.deleteTransaction(id, user.id);
       
       if (!result.success) {
@@ -81,4 +75,6 @@ module.exports = async (req, res) => {
       error: error.message || 'SERVER_ERROR' 
     });
   }
-};
+}
+
+module.exports = (req, res) => handleCors(req, res, handler);

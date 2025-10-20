@@ -24,6 +24,14 @@
       "dest": "/api/auth/logout.js"
     },
     {
+      "src": "/api/tips/generate",
+      "dest": "/api/tips/index.js"
+    },
+    {
+      "src": "/api/tips",
+      "dest": "/api/tips/index.js"
+    },
+    {
       "src": "/api/transactions/stats",
       "dest": "/api/transactions/stats.js"
     },
@@ -50,14 +58,6 @@
     {
       "src": "/api/notifications",
       "dest": "/api/notifications/index.js"
-    },
-    {
-      "src": "/api/tips/generate",
-      "dest": "/api/tips/index.js"
-    },
-    {
-      "src": "/api/tips",
-      "dest": "/api/tips/index.js"
     }
   ],
   "env": {

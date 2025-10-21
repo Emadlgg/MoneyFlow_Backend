@@ -1,0 +1,9 @@
+# Ignorar funciones que NO quieres desplegar
+api/tips/
+api/notifications/
+
+# Mantener solo:
+# - api/_helpers/
+# - api/health.js
+# - api/auth/
+# - api/transactions/

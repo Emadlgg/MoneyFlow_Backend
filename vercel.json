@@ -2,7 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/**/*.js",
+      "src": "api/health.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/tips/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/auth/login.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/auth/register.js",
       "use": "@vercel/node"
     }
   ],
@@ -12,52 +24,24 @@
       "dest": "/api/health.js"
     },
     {
-      "src": "/api/auth/register",
-      "dest": "/api/auth/register.js"
-    },
-    {
-      "src": "/api/auth/login",
-      "dest": "/api/auth/login.js"
-    },
-    {
-      "src": "/api/auth/logout",
-      "dest": "/api/auth/logout.js"
-    },
-    {
       "src": "/api/tips/generate",
-      "dest": "/api/tips/index.js"
+      "dest": "/api/tips/index.js",
+      "methods": ["POST", "OPTIONS"]
     },
     {
       "src": "/api/tips",
-      "dest": "/api/tips/index.js"
+      "dest": "/api/tips/index.js",
+      "methods": ["POST", "OPTIONS"]
     },
     {
-      "src": "/api/transactions/stats",
-      "dest": "/api/transactions/stats.js"
+      "src": "/api/auth/login",
+      "dest": "/api/auth/login.js",
+      "methods": ["POST", "OPTIONS"]
     },
     {
-      "src": "/api/transactions/([^/]+)",
-      "dest": "/api/transactions/[id].js"
-    },
-    {
-      "src": "/api/transactions",
-      "dest": "/api/transactions/index.js"
-    },
-    {
-      "src": "/api/notifications/preferences",
-      "dest": "/api/notifications/preferences.js"
-    },
-    {
-      "src": "/api/notifications/taxes/([^/]+)",
-      "dest": "/api/notifications/taxes/[id].js"
-    },
-    {
-      "src": "/api/notifications/taxes",
-      "dest": "/api/notifications/taxes.js"
-    },
-    {
-      "src": "/api/notifications",
-      "dest": "/api/notifications/index.js"
+      "src": "/api/auth/register",
+      "dest": "/api/auth/register.js",
+      "methods": ["POST", "OPTIONS"]
     }
   ],
   "env": {
